@@ -10,7 +10,7 @@ Features:
 
 
 
-![Alt text](images/SSLogin.png)
-![Alt text](images/SSButtons.png)
-![Alt text](images/SSGame1.png)
-![Alt text](images/SSGame.png)
+![Alt text](Images/SSLogin.png)
+![Alt text](Images/SSButtons.png)
+![Alt text](Images/SSGame1.png)
+![Alt text](Images/SSGame.png)
