@@ -149,6 +149,7 @@ class SedecordleSolver:
 
     def init_game(self):
         self.game_frame = tk.Frame(self.root, padx=5, pady=5)
+        self.root.attributes('-fullscreen', True)
         self.game_frame.pack()
 
         print("Game Seed:", self.seed)
@@ -182,7 +183,7 @@ class SedecordleSolver:
         # Ensure solver button appears correctly without conflicting with grid layout
         if self.is_developer:
             self.solver_button = tk.Button(self.game_frame, text="Solver Mode", command=self.toggle_solver)
-            self.solver_button.grid(row=21, column=0, padx=10, pady=5, sticky="w")
+            self.solver_button.grid(row=21, column=0, padx=10, sticky="w")
 
         self.input_frame = tk.Frame(self.root, pady=5)
         self.input_frame.pack()
@@ -202,6 +203,8 @@ class SedecordleSolver:
         self.submit_button.pack(side=tk.LEFT, padx=5)
 
         # Display the current seed at the bottom right of the input frame
+        self.seed_copy_button = tk.Button(self.input_frame, text="Copy Seed", command=self.copy_seed)
+        self.seed_copy_button.pack(side=tk.RIGHT, padx=5)
         self.seed_label = tk.Label(self.input_frame, text=f"Seed: {self.seed}", font=("Courier", 10))
         self.seed_label.pack(side=tk.RIGHT, padx=10)
 
@@ -213,11 +216,18 @@ class SedecordleSolver:
         self.seed_entry_button = tk.Button(self.input_frame, text="Load Seed", command=self.load_new_seed)
         self.seed_entry_button.pack(side=tk.LEFT, padx=5)
 
+
         self.dark_mode_frame = tk.Frame(self.root, pady=5)
         self.dark_mode_frame.pack()
 
         self.dark_mode_button = tk.Button(self.root, text="Toggle Dark Mode", command=self.toggle_dark_mode)
         self.dark_mode_button.pack(pady=5)
+
+        self.reset_button = tk.Button(self.game_frame, text="New Game", command=self.reset_game)
+        self.reset_button.grid(row=21, column=0)
+
+        self.exit_button = tk.Button(self.game_frame, text="Exit", width=20, command=self.root.destroy)
+        self.exit_button.grid(row=21, column=7)
 
         self.is_dark_mode = False
         self.apply_theme()
@@ -325,10 +335,14 @@ class SedecordleSolver:
         self.seed_entry_label.config(bg=bg_color, fg=fg_color)
         self.seed_entry.config(bg=btn_bg, fg=fg_color, insertbackground=fg_color)
         self.seed_entry_button.config(bg=btn_bg, fg=fg_color)
+        self.seed_copy_button.config(bg=btn_bg, fg=fg_color)
         self.input_label.config(bg=bg_color, fg=fg_color)
         self.input_box.config(bg=btn_bg, fg=fg_color, insertbackground=fg_color)
         self.submit_button.config(bg=btn_bg, fg=fg_color)
         self.dark_mode_button.config(bg=btn_bg, fg=fg_color)
+        self.solver_button.config(bg=btn_bg, fg=fg_color)
+        self.exit_button.config(bg=btn_bg, fg=fg_color)
+        self.reset_button.config(bg=btn_bg, fg=fg_color)
         self.timer_label.config(bg=bg_color, fg=fg_color)
         for grid in self.grids:
             for row in grid:
@@ -343,6 +357,41 @@ class SedecordleSolver:
             print("Loaded new seed:", self.seed)
         else:
             print("Invalid seed format.")
+
+    def copy_seed(self):
+        self.root.clipboard_clear()  # Clear clipboard
+        self.root.clipboard_append(self.seed)  # Add current seed to clipboard
+        self.root.update()  # Keep it after window closes (optional)
+        print(f"Seed '{self.seed}' copied to clipboard.")
+
+    def reset_game(self):
+        # Generate new seed and words
+        self.target_words, self.seed = get_seeded_words(self.word_library)
+
+        # Clear all grid entries
+        for grid in self.grids:
+            for row_entries in grid:
+                for entry in row_entries:
+                    entry.config(state=tk.NORMAL)
+                    entry.delete(0, tk.END)
+                    entry.config(state=tk.DISABLED, bg="gray22")
+
+        # Reset state
+        self.current_row = 0
+        self.completed_grids.clear()
+
+        # Reset timer
+        self.timer_running = False
+        self.start_time = None
+        self.end_time = None
+        self.timer_label.config(text="00:00:000")
+
+        # Update seed display
+        self.seed_label.config(text=f"Seed: {self.seed}")
+
+        print("Game reset. New seed:", self.seed)
+        print("New target words:", self.target_words)
+
 
 def game(seed=None):
         word_library = load_word_library(r"5_letter_words.json")
